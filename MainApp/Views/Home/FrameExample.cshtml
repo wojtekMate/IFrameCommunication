@@ -1,0 +1,45 @@
+﻿@{
+    ViewData["Title"] = "IFrame example";
+}
+<h1>@ViewData["Title"]</h1>
+
+<div>
+    Iframne div
+    <iframe id="reactIframe" height="300px" width="400px" src="http://localhost:3000">
+        
+    </iframe>
+</div>
+
+<div>
+    <span>View bug:</span>
+    <span>@ViewBag.Message</span>
+</div>
+
+<div>
+    <form method="post" action="@Url.Action("ChangeContext", "Home")">
+        <button onclick="onSessionChanged()" type="submit">Send event to react app</button>
+    </form>
+</div>
+<script>
+    @Html.Raw(ViewBag.Script)
+        var iframe = document.getElementById('reactIframe');
+    
+        //publish event
+        function onSessionChanged() {
+            var sessionData = {
+                sessionId: 'new_session_id',
+                userId: 'user123'
+            };
+            console.log('Sending event to react app....');
+            iframe.contentWindow.postMessage({ event: 'sessionChanged', data: sessionData }, 'http://localhost:3000/');
+        }
+    
+        //waiting for events
+        window.addEventListener('message', function(event) {
+          //  if (event.origin !== 'http://localhost:3000') return; // check message origin       
+            var eventData = event.data;
+            if (eventData.event === 'sessionChangedReceived') {
+                console.log('Event received in MVC app');
+            }
+        });
+</script>
